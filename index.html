@@ -1,401 +1,234 @@
 
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Text Converter - Xuất văn bản</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Text Converter AI</title>
 <style>
-:root {
-  --bg: #0b1020;
-  --panel: #141c2e;
-  --line: #2a3650;
-  --text: #edf2ff;
-  --muted: #9aa8c4;
-  --accent: #6685ff;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  padding: 20px 12px 35px;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-}
-.app { max-width: 900px; margin: auto; }
-header { margin-bottom: 22px; }
-h1 { font-size: 25px; margin: 0 0 8px; }
-header p { color: var(--muted); margin: 0; line-height: 1.6; }
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  padding: 16px;
-  margin-bottom: 15px;
-}
-.label {
-  display: block;
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-input[type="text"], select, textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: #0c1323;
-  color: var(--text);
-  font: inherit;
-  outline: none;
-}
-input:focus, textarea:focus, select:focus {
-  border-color: var(--accent);
-}
-textarea {
-  min-height: 300px;
-  resize: vertical;
-  line-height: 1.7;
-  font-size: 15px;
-}
-input[type="file"] {
-  width: 100%;
-  color: var(--muted);
-  font-size: 13px;
-}
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 12px;
-  color: var(--muted);
-  font-size: 12px;
-}
-button {
-  border: 0;
-  border-radius: 9px;
-  padding: 12px 15px;
-  background: var(--accent);
-  color: white;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-}
-button.secondary {
-  background: #26334d;
-  border: 1px solid #384763;
-}
-button.danger { background: #842e43; }
-button:active { opacity: .8; }
-.actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 15px;
-}
-.actions button { width: 100%; }
-.hint {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.6;
-  margin-top: 12px;
-}
-#status { margin-top: 12px; font-size: 13px; color: #9fddb8; }
-footer { color: var(--muted); font-size: 12px; text-align: center; }
-@media (max-width: 480px) {
-  .row { grid-template-columns: 1fr; }
-  .panel { padding: 13px; }
-  h1 { font-size: 22px; }
-}
-@media print {
-  body { background: white; color: black; padding: 0; }
-  header, .panel:not(.editor), footer { display: none !important; }
-  .app { max-width: none; }
-  .editor { border: 0; padding: 0; margin: 0; background: white; }
-  #content {
-    display: block;
-    border: 0;
-    color: black;
-    background: white;
-    padding: 0;
-    min-height: 0;
-    overflow: visible;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-}
+:root{--bg:#0b1020;--panel:#151e31;--line:#2b3851;--text:#edf2ff;--muted:#a3b0ca;--blue:#6685ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;padding:18px 12px 35px}
+.app{max-width:850px;margin:auto}
+h1{font-size:24px;margin:0 0 8px}
+.sub,.hint{color:var(--muted);font-size:13px;line-height:1.6}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;margin:15px 0}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 7px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:#0b1323;color:var(--text);font:inherit}
+textarea{min-height:240px;resize:vertical;line-height:1.65}
+button{border:0;border-radius:9px;padding:11px 13px;background:var(--blue);color:white;font-weight:650;cursor:pointer}
+button.secondary{background:#293650}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.stats{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.ai-title{display:flex;align-items:center;gap:9px}
+.ai-title h2{font-size:19px;margin:0}
+.tag{font-size:11px;background:#253b68;padding:5px 8px;border-radius:20px}
+.chat{height:270px;overflow:auto;background:#0b1323;border:1px solid var(--line);border-radius:11px;padding:10px}
+.msg{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;font-size:14px;padding:11px 12px;border-radius:12px;margin:8px 0;max-width:95%}
+.bot{background:#202c43}
+.user{background:#314c91;margin-left:auto}
+.quick{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.quick button{font-size:12px;padding:9px;background:#263550}
+.chatinput{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+#status{font-size:13px;color:#9fddb8;margin-top:10px}
+@media(max-width:480px){.row{grid-template-columns:1fr}.panel{padding:12px}h1{font-size:22px}}
 </style>
 </head>
-
 <body>
 <div class="app">
 <header>
-  <h1>📝 Text Converter</h1>
-  <p>Soạn thảo, tải văn bản và xuất nhiều định dạng file ngay trên điện thoại.</p>
+<h1>📝 Text Converter AI</h1>
+<p class="sub">Soạn thảo văn bản · Xuất file · Trợ lý định dạng · Hướng dẫn gửi Zalo</p>
 </header>
 
 <section class="panel">
-  <label class="label" for="fileInput">1. Tải văn bản có sẵn</label>
-  <input id="fileInput" type="file"
-    accept=".txt,.md,.csv,.json,.html,.xml,.log,.text">
-  <p class="hint">Hỗ trợ đọc các file văn bản phổ biến. Nội dung file sẽ thay thế nội dung đang soạn.</p>
+<label for="file">Mở file văn bản có sẵn</label>
+<input type="file" id="file" accept=".txt,.md,.csv,.json,.html,.xml,.log,.text">
+<p class="hint">Hỗ trợ đọc văn bản TXT, MD, CSV, JSON, HTML, XML và LOG.</p>
+
+<div class="row">
+<div>
+<label for="name">Tên file</label>
+<input id="name" value="van-ban-moi">
+</div>
+<div>
+<label for="fmt">Định dạng xuất</label>
+<select id="fmt">
+<option value="pdf">PDF - In ấn, chia sẻ</option>
+<option value="doc">DOC - Mở bằng Word</option>
+<option value="txt">TXT - Văn bản thuần</option>
+<option value="md">MD - Markdown</option>
+<option value="html">HTML - Trang web</option>
+<option value="csv">CSV - Dữ liệu bảng</option>
+<option value="json">JSON - Dữ liệu có cấu trúc</option>
+</select>
+</div>
+</div>
+
+<label for="content">Nội dung văn bản</label>
+<textarea id="content" placeholder="Nhập hoặc dán văn bản của bạn..."></textarea>
+<div class="stats">
+<span id="chars">0 ký tự</span><span id="words">0 từ</span><span id="lines">0 dòng</span>
+</div>
+<div class="actions">
+<button id="export">⬇ Xuất file</button>
+<button class="secondary" id="copy">Sao chép văn bản</button>
+<button class="secondary" id="print">Xem / in văn bản</button>
+<button class="secondary" id="clear">Xóa nội dung</button>
+</div>
+<div id="status"></div>
 </section>
 
 <section class="panel">
-  <div class="row">
-    <div>
-      <label class="label" for="filename">Tên file xuất ra</label>
-      <input id="filename" type="text" value="van-ban-moi"
-        placeholder="Nhập tên file">
-    </div>
-    <div>
-      <label class="label" for="format">Định dạng xuất</label>
-      <select id="format">
-        <option value="txt">TXT - Văn bản thuần</option>
-        <option value="md">Markdown - MD</option>
-        <option value="html">HTML - Trang web</option>
-        <option value="csv">CSV - Dữ liệu bảng</option>
-        <option value="json">JSON - Dữ liệu</option>
-        <option value="doc">Word - DOC</option>
-        <option value="pdf">PDF - Tài liệu</option>
-      </select>
-    </div>
-  </div>
+<div class="ai-title">
+<h2>✨ abcxyz </h2><span class="tag">Hỗ trợ định dạng</span>
+</div>
+<p class="sub">Hỏi cách chọn file, in tài liệu, tải về hoặc gửi qua Zalo trên iPhone và Android.</p>
+<div class="quick">
+<button data-q="Tôi muốn làm file để in">Làm file để in</button>
+<button data-q="Hướng dẫn gửi file qua Zalo trên iPhone">Zalo iPhone</button>
+<button data-q="Hướng dẫn gửi file qua Zalo trên Android">Zalo Android</button>
+<button data-q="Tôi muốn gửi file để người khác chỉnh sửa">File để chỉnh sửa</button>
+<button data-q="Tôi muốn lưu danh sách dữ liệu">Lưu dữ liệu</button>
+</div>
+<div class="chat" id="chat" aria-live="polite">
+<div class="msg bot">Xin chào! Mình là trợ lý xuất file.
+
+Bạn đang cần làm tài liệu gì? Ví dụ: menu để in, đơn từ, bảng danh sách hoặc văn bản gửi qua Zalo.
+
+Hãy hỏi mình để được tư vấn định dạng và cách lấy file nhé!</div>
+</div>
+<div class="chatinput">
+<input id="question" placeholder="Nhập câu hỏi của bạn...">
+<button id="ask">Gửi</button>
+</div>
+<p class="hint">Trợ lý hiện dùng các hướng dẫn tích hợp sẵn, không gửi nội dung của bạn ra ngoài. Muốn AI trả lời mọi câu hỏi linh hoạt cần kết nối API AI qua máy chủ bảo mật.</p>
 </section>
-
-<section class="panel editor">
-  <label class="label" for="content">2. Nội dung văn bản</label>
-  <textarea id="content" placeholder="Dán hoặc nhập văn bản của bạn tại đây..."></textarea>
-  <div class="stats">
-    <span id="chars">0 ký tự</span>
-    <span id="words">0 từ</span>
-    <span id="lines">0 dòng</span>
-  </div>
-
-  <div class="actions">
-    <button id="exportBtn">⬇ Xuất file</button>
-    <button class="secondary" id="copyBtn">📋 Sao chép</button>
-    <button class="secondary" id="openBtn">📂 Mở file</button>
-    <button class="danger" id="clearBtn">Xóa nội dung</button>
-  </div>
-  <div id="status" role="status"></div>
-  <p class="hint">
-    PDF cần kết nối Internet để tải thư viện tạo file. Nếu không dùng được,
-    chọn In từ trình duyệt rồi lưu thành PDF nếu thiết bị hỗ trợ.
-  </p>
-</section>
-
-<footer>Text Converter · Xử lý văn bản trực tiếp trên trình duyệt</footer>
 </div>
 
 <script>
-const content = document.getElementById("content");
-const filename = document.getElementById("filename");
-const format = document.getElementById("format");
-const fileInput = document.getElementById("fileInput");
-const statusBox = document.getElementById("status");
+const $=id=>document.getElementById(id);
+const content=$("content");
+const fmt=$("fmt");
+const status=$("status");
 
-function status(message, error = false) {
-  statusBox.textContent = message;
-  statusBox.style.color = error ? "#ff9b9b" : "#9fddb8";
+function updateStats(){
+ const t=content.value;
+ $("chars").textContent=t.length.toLocaleString()+" ký tự";
+ $("words").textContent=(t.trim()?t.trim().split(/\s+/u).length:0)+" từ";
+ $("lines").textContent=(t?t.split(/\r\n|\r|\n/).length:0)+" dòng";
 }
+content.addEventListener("input",updateStats);
 
-function updateStats() {
-  const text = content.value;
-  document.getElementById("chars").textContent =
-    text.length.toLocaleString() + " ký tự";
-  document.getElementById("words").textContent =
-    (text.trim() ? text.trim().split(/\s+/u).length : 0) + " từ";
-  document.getElementById("lines").textContent =
-    (text ? text.split(/\r\n|\r|\n/).length : 0) + " dòng";
+function safeName(s){
+ return (s.trim()||"van-ban-moi").replace(/[\\/:*?"<>|]/g,"_").slice(0,120);
 }
-
-content.addEventListener("input", updateStats);
-
-fileInput.addEventListener("change", async () => {
-  const file = fileInput.files[0];
-  if (!file) return;
-
-  try {
-    content.value = await file.text();
-    filename.value = file.name.replace(/\.[^.]+$/, "") || "van-ban-moi";
-    updateStats();
-    status("Đã mở: " + file.name);
-  } catch (error) {
-    status("Không thể đọc file này.", true);
-  }
+function esc(s){
+ return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function download(blob,name){
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+$("file").addEventListener("change",async()=>{
+ const f=$("file").files[0];if(!f)return;
+ try{
+  content.value=await f.text();
+  $("name").value=f.name.replace(/\.[^.]+$/,"")||"van-ban-moi";
+  updateStats();status.textContent="Đã mở "+f.name;
+ }catch(e){status.textContent="Không đọc được file này."}
 });
 
-function safeFilename(name) {
-  return (name.trim() || "van-ban-moi")
-    .replace(/[\\/:*?"<>|]/g, "_")
-    .slice(0, 150);
-}
-
-function downloadBlob(blob, name) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 30000);
-}
-
-function makeExport() {
-  const text = content.value;
-  const base = safeFilename(filename.value);
-  let blob;
-  let ext = format.value;
-
-  switch (ext) {
-    case "txt":
-    case "md":
-      blob = new Blob(["\uFEFF", text], {
-        type: "text/plain;charset=utf-8"
-      });
-      break;
-
-    case "html":
-      const html = `<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<title>${escapeHtml(base)}</title>
-</head>
-<body><pre style="white-space:pre-wrap;font-family:Arial,sans-serif">${escapeHtml(text)}</pre></body>
-</html>`;
-      blob = new Blob([html], {
-        type: "text/html;charset=utf-8"
-      });
-      break;
-
-    case "csv":
-      // Xuất một cột "Nội dung"; mỗi dòng văn bản là một dòng CSV.
-      const rows = ["Nội dung", ...text.split(/\r\n|\r|\n/)];
-      const csv = rows.map(value =>
-        '"' + value.replace(/"/g, '""') + '"'
-      ).join("\r\n");
-      blob = new Blob(["\uFEFF", csv], {
-        type: "text/csv;charset=utf-8"
-      });
-      break;
-
-    case "json":
-      blob = new Blob([
-        JSON.stringify({
-          filename: base,
-          content: text
-        }, null, 2)
-      ], { type: "application/json;charset=utf-8" });
-      break;
-
-    case "doc":
-      const docHtml = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"></head>
-<body><pre style="white-space:pre-wrap;font-family:Arial">${escapeHtml(text)}</pre></body></html>`;
-      blob = new Blob(["\uFEFF", docHtml], {
-        type: "application/msword"
-      });
-      break;
-
-    case "pdf":
-      exportPDF(base);
-      return;
-
-    default:
-      status("Định dạng chưa được hỗ trợ.", true);
-      return;
-  }
-
-  downloadBlob(blob, base + "." + ext);
-  status("Đã tạo file " + base + "." + ext);
-}
-
-function escapeHtml(str) {
-  return str.replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-}
-
-async function exportPDF(base) {
-  if (typeof html2pdf === "undefined") {
-    status("Không tải được thư viện PDF. Hãy kiểm tra Internet.", true);
-    return;
-  }
-
-  const node = document.createElement("div");
-  node.style.cssText =
-    "font-family:Arial,sans-serif;font-size:12pt;line-height:1.6;" +
-    "color:#111;background:white;white-space:pre-wrap;" +
-    "overflow-wrap:anywhere;word-break:break-word;padding:10px;";
-  node.textContent = content.value;
-  document.body.appendChild(node);
-
-  try {
-    status("Đang tạo PDF...");
-    await html2pdf().set({
-      margin: 12,
-      filename: base + ".pdf",
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["css", "legacy"] }
-    }).from(node).save();
-    status("Đã xuất PDF.");
-  } catch (error) {
-    status("Tạo PDF thất bại. Hãy thử lại hoặc dùng chức năng In.", true);
-  } finally {
-    node.remove();
-  }
-}
-
-document.getElementById("exportBtn").addEventListener("click", makeExport);
-
-document.getElementById("copyBtn").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(content.value);
-    status("Đã sao chép văn bản.");
-  } catch (error) {
-    content.focus();
-    content.select();
-    status("Đã chọn văn bản. Hãy nhấn Sao chép trên thiết bị.");
-  }
+$("export").addEventListener("click",()=>{
+ const t=content.value, n=safeName($("name").value);
+ let blob,ext=fmt.value;
+ if(ext==="pdf"){
+  status.textContent="Đang mở hộp thoại in. Chọn Lưu thành PDF nếu thiết bị hỗ trợ.";
+  window.print();return;
+ }
+ if(ext==="txt"||ext==="md"){
+  blob=new Blob(["\uFEFF",t],{type:"text/plain;charset=utf-8"});
+ }else if(ext==="html"){
+  blob=new Blob(['<!DOCTYPE html><html lang="vi"><meta charset="UTF-8"><title>'+esc(n)+'</title><body><pre style="white-space:pre-wrap;font-family:Arial">'+esc(t)+'</pre></body></html>'],{type:"text/html;charset=utf-8"});
+ }else if(ext==="doc"){
+  blob=new Blob(['\uFEFF<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><pre style="white-space:pre-wrap;font-family:Arial">'+esc(t)+'</pre></body></html>'],{type:"application/msword"});
+ }else if(ext==="csv"){
+  const csv=["Nội dung",...t.split(/\r\n|\r|\n/)].map(x=>'"'+x.replace(/"/g,'""')+'"').join("\r\n");
+  blob=new Blob(["\uFEFF",csv],{type:"text/csv;charset=utf-8"});
+ }else if(ext==="json"){
+  blob=new Blob([JSON.stringify({filename:n,content:t},null,2)],{type:"application/json;charset=utf-8"});
+ }
+ if(blob){download(blob,n+"."+ext);status.textContent="Đã xuất "+n+"."+ext}
 });
 
-document.getElementById("openBtn").addEventListener("click", () => {
-  fileInput.click();
+$("copy").addEventListener("click",async()=>{
+ try{await navigator.clipboard.writeText(content.value);status.textContent="Đã sao chép văn bản."}
+ catch(e){content.focus();content.select();status.textContent="Văn bản đã được chọn. Hãy dùng lệnh Sao chép."}
+});
+$("print").addEventListener("click",()=>window.print());
+$("clear").addEventListener("click",()=>{
+ if(confirm("Xóa toàn bộ nội dung?")){content.value="";updateStats();status.textContent="Đã xóa."}
 });
 
-document.getElementById("clearBtn").addEventListener("click", () => {
-  if (!content.value || confirm("Bạn có chắc muốn xóa toàn bộ văn bản?")) {
-    content.value = "";
-    updateStats();
-    status("Đã xóa nội dung.");
-  }
-});
+$("file").setAttribute("aria-label","Chọn file văn bản");
 
-format.addEventListener("change", () => {
-  if (format.value === "pdf") {
-    status("PDF sẽ được tạo từ nội dung văn bản hiện tại.");
-  } else {
-    status("Định dạng: " + format.options[format.selectedIndex].text);
-  }
-});
+function reply(q){
+ const s=q.toLowerCase();
+ if(/in ấn|để in|in tài liệu|menu|in ra giấy/.test(s)){
+  return "📄 Gợi ý: PDF thường phù hợp nhất để in vì giữ bố cục ổn định.\n\nCách làm:\n1. Chọn PDF - In ấn, chia sẻ.\n2. Nhấn Xuất file.\n3. Trong hộp thoại in, chọn Lưu thành PDF nếu tùy chọn này có trên thiết bị.\n4. Mở file xem lại khổ giấy, lề và nội dung trước khi in.\n\nNếu cần sửa nội dung sau này, hãy giữ thêm một bản DOC/DOCX. Lưu ý: nút PDF hiện dùng chức năng in của trình duyệt; trên iPhone có thể chọn Chia sẻ → Lưu vào Tệp.";
+ }
+ if(/zalo/.test(s)&&/iphone|ios|ipados/.test(s)){
+  return "📱 Gửi file qua Zalo trên iPhone:\n\n1. Xuất file. Nếu trình duyệt hiện hộp thoại chia sẻ, chọn Lưu vào Tệp và lưu vào mục Tải về hoặc Trên iPhone của tôi.\n2. Mở Zalo, vào cuộc trò chuyện cần gửi.\n3. Nhấn dấu + hoặc biểu tượng đính kèm (tùy phiên bản), tìm mục Tài liệu/File.\n4. Chọn Duyệt, tìm file trong ứng dụng Tệp rồi gửi.\n\nNếu file chưa thấy, mở ứng dụng Tệp → Tải về để kiểm tra. Các nút có thể khác đôi chút tùy phiên bản iOS và Zalo.";
+ }
+ if(/zalo/.test(s)&&/android|samsung|xiaomi|oppo/.test(s)){
+  return "📱 Gửi file qua Zalo trên Android:\n\n1. Xuất file và kiểm tra thư mục Download/Tải xuống trong ứng dụng Quản lý tệp.\n2. Mở Zalo và cuộc trò chuyện cần gửi.\n3. Nhấn dấu + hoặc biểu tượng đính kèm, chọn Tài liệu/File nếu có.\n4. Mở Download/Tải xuống, chọn file rồi nhấn gửi.\n\nNếu trình duyệt hỏi nơi lưu, hãy chọn Tải xuống. Tên menu có thể khác tùy hãng điện thoại và phiên bản ứng dụng.";
+ }
+ if(/zalo/.test(s)){
+  return "Bạn dùng iPhone hay Android?\n\n• iPhone: thường lưu file vào ứng dụng Tệp, sau đó mở Zalo và đính kèm tài liệu.\n• Android: thường lưu vào thư mục Download/Tải xuống, sau đó đính kèm trong Zalo.\n\nBạn có thể hỏi tiếp: “Zalo iPhone” hoặc “Zalo Android” để xem hướng dẫn chi tiết.";
+ }
+ if(/chỉnh sửa|sửa tiếp|word|docx/.test(s)){
+  return "📝 Nếu người nhận cần chỉnh sửa, nên dùng Word DOC/DOCX. Bản web này xuất DOC dạng HTML để Word có thể mở, không phải DOCX chuẩn. Nếu cần định dạng Word chuẩn, hãy mở nội dung trong Microsoft Word hoặc Google Docs rồi lưu thành DOCX. PDF phù hợp hơn khi chỉ cần xem hoặc in.";
+ }
+ if(/dữ liệu|danh sách|excel|bảng|csv/.test(s)){
+  return "📊 Chọn định dạng theo mục đích:\n\n• CSV: danh sách dạng bảng, có thể mở bằng Excel hoặc Google Sheets.\n• TXT: danh sách văn bản đơn giản.\n• JSON: dữ liệu có cấu trúc để trao đổi giữa các phần mềm.\n\nCSV ở web này coi mỗi dòng là một ô trong cột Nội dung. Nếu bạn có nhiều cột phân cách bằng dấu phẩy, nên kiểm tra lại trước khi sử dụng.";
+ }
+ if(/pdf/.test(s)){
+  return "PDF phù hợp để chia sẻ và in. Nhấn Xuất file rồi chọn PDF. Bản hiện tại mở chức năng In của trình duyệt; chọn Lưu thành PDF nếu thiết bị hỗ trợ. Trên iPhone, bạn cũng có thể dùng Chia sẻ → Lưu vào Tệp.";
+ }
+ if(/txt/.test(s)){
+  return "TXT phù hợp với văn bản thuần, ghi chú hoặc danh sách đơn giản. File nhẹ và dễ mở trên hầu hết thiết bị, nhưng không giữ kiểu chữ và bố cục phức tạp.";
+ }
+ if(/html/.test(s)){
+  return "HTML phù hợp khi bạn muốn lưu nội dung thành trang web. Nếu chỉ cần gửi văn bản cho người khác đọc, TXT hoặc PDF thường dễ sử dụng hơn.";
+ }
+ if(/định dạng nào|nên chọn|chọn file|loại file/.test(s)){
+  return "Bạn có thể chọn theo mục đích:\n\n• In hoặc chia sẻ bố cục: PDF.\n• Chỉnh sửa bằng Word: DOCX chuẩn (cần chuyển qua Word/Google Docs).\n• Văn bản đơn giản: TXT.\n• Danh sách dạng bảng: CSV.\n• Dữ liệu phần mềm: JSON.\n• Trang web: HTML.\n\nBạn định dùng file để in, gửi Zalo, chỉnh sửa hay lưu dữ liệu?";
+ }
+ return "Mình có thể hướng dẫn chọn định dạng và cách lưu/gửi file với các tình huống phổ biến.\n\nBạn hãy nói rõ mục đích, ví dụ:\n• Làm menu để in khổ A4.\n• Gửi file qua Zalo trên iPhone.\n• Gửi tài liệu để người khác sửa.\n• Xuất danh sách sang Excel.\n\nLưu ý: đây là trợ lý hướng dẫn tích hợp sẵn, chưa có mô hình AI trực tuyến để hiểu và trả lời mọi chủ đề.";
+}
 
+function addMsg(text,type){
+ const el=document.createElement("div");
+ el.className="msg "+type;
+ el.textContent=text;
+ $("chat").appendChild(el);
+ $("chat").scrollTop=$("chat").scrollHeight;
+}
+function ask(){
+ const input=$("question"),q=input.value.trim();
+ if(!q)return;
+ addMsg(q,"user");input.value="";
+ addMsg(reply(q),"bot");
+}
+$("ask").addEventListener("click",ask);
+$("question").addEventListener("keydown",e=>{if(e.key==="Enter")ask()});
+document.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>{
+ $("question").value=b.dataset.q;ask();
+}));
 updateStats();
 </script>
 </body>
