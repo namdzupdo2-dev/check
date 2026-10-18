@@ -1,0 +1,402 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text Converter - Xuất văn bản</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
+
+<style>
+:root {
+  --bg: #0b1020;
+  --panel: #141c2e;
+  --line: #2a3650;
+  --text: #edf2ff;
+  --muted: #9aa8c4;
+  --accent: #6685ff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 20px 12px 35px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+}
+.app { max-width: 900px; margin: auto; }
+header { margin-bottom: 22px; }
+h1 { font-size: 25px; margin: 0 0 8px; }
+header p { color: var(--muted); margin: 0; line-height: 1.6; }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 16px;
+  margin-bottom: 15px;
+}
+.label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+input[type="text"], select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #0c1323;
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+}
+textarea {
+  min-height: 300px;
+  resize: vertical;
+  line-height: 1.7;
+  font-size: 15px;
+}
+input[type="file"] {
+  width: 100%;
+  color: var(--muted);
+  font-size: 13px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 15px;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+button.secondary {
+  background: #26334d;
+  border: 1px solid #384763;
+}
+button.danger { background: #842e43; }
+button:active { opacity: .8; }
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 15px;
+}
+.actions button { width: 100%; }
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+#status { margin-top: 12px; font-size: 13px; color: #9fddb8; }
+footer { color: var(--muted); font-size: 12px; text-align: center; }
+@media (max-width: 480px) {
+  .row { grid-template-columns: 1fr; }
+  .panel { padding: 13px; }
+  h1 { font-size: 22px; }
+}
+@media print {
+  body { background: white; color: black; padding: 0; }
+  header, .panel:not(.editor), footer { display: none !important; }
+  .app { max-width: none; }
+  .editor { border: 0; padding: 0; margin: 0; background: white; }
+  #content {
+    display: block;
+    border: 0;
+    color: black;
+    background: white;
+    padding: 0;
+    min-height: 0;
+    overflow: visible;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<header>
+  <h1>📝 Text Converter</h1>
+  <p>Soạn thảo, tải văn bản và xuất nhiều định dạng file ngay trên điện thoại.</p>
+</header>
+
+<section class="panel">
+  <label class="label" for="fileInput">1. Tải văn bản có sẵn</label>
+  <input id="fileInput" type="file"
+    accept=".txt,.md,.csv,.json,.html,.xml,.log,.text">
+  <p class="hint">Hỗ trợ đọc các file văn bản phổ biến. Nội dung file sẽ thay thế nội dung đang soạn.</p>
+</section>
+
+<section class="panel">
+  <div class="row">
+    <div>
+      <label class="label" for="filename">Tên file xuất ra</label>
+      <input id="filename" type="text" value="van-ban-moi"
+        placeholder="Nhập tên file">
+    </div>
+    <div>
+      <label class="label" for="format">Định dạng xuất</label>
+      <select id="format">
+        <option value="txt">TXT - Văn bản thuần</option>
+        <option value="md">Markdown - MD</option>
+        <option value="html">HTML - Trang web</option>
+        <option value="csv">CSV - Dữ liệu bảng</option>
+        <option value="json">JSON - Dữ liệu</option>
+        <option value="doc">Word - DOC</option>
+        <option value="pdf">PDF - Tài liệu</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<section class="panel editor">
+  <label class="label" for="content">2. Nội dung văn bản</label>
+  <textarea id="content" placeholder="Dán hoặc nhập văn bản của bạn tại đây..."></textarea>
+  <div class="stats">
+    <span id="chars">0 ký tự</span>
+    <span id="words">0 từ</span>
+    <span id="lines">0 dòng</span>
+  </div>
+
+  <div class="actions">
+    <button id="exportBtn">⬇ Xuất file</button>
+    <button class="secondary" id="copyBtn">📋 Sao chép</button>
+    <button class="secondary" id="openBtn">📂 Mở file</button>
+    <button class="danger" id="clearBtn">Xóa nội dung</button>
+  </div>
+  <div id="status" role="status"></div>
+  <p class="hint">
+    PDF cần kết nối Internet để tải thư viện tạo file. Nếu không dùng được,
+    chọn In từ trình duyệt rồi lưu thành PDF nếu thiết bị hỗ trợ.
+  </p>
+</section>
+
+<footer>Text Converter · Xử lý văn bản trực tiếp trên trình duyệt</footer>
+</div>
+
+<script>
+const content = document.getElementById("content");
+const filename = document.getElementById("filename");
+const format = document.getElementById("format");
+const fileInput = document.getElementById("fileInput");
+const statusBox = document.getElementById("status");
+
+function status(message, error = false) {
+  statusBox.textContent = message;
+  statusBox.style.color = error ? "#ff9b9b" : "#9fddb8";
+}
+
+function updateStats() {
+  const text = content.value;
+  document.getElementById("chars").textContent =
+    text.length.toLocaleString() + " ký tự";
+  document.getElementById("words").textContent =
+    (text.trim() ? text.trim().split(/\s+/u).length : 0) + " từ";
+  document.getElementById("lines").textContent =
+    (text ? text.split(/\r\n|\r|\n/).length : 0) + " dòng";
+}
+
+content.addEventListener("input", updateStats);
+
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  try {
+    content.value = await file.text();
+    filename.value = file.name.replace(/\.[^.]+$/, "") || "van-ban-moi";
+    updateStats();
+    status("Đã mở: " + file.name);
+  } catch (error) {
+    status("Không thể đọc file này.", true);
+  }
+});
+
+function safeFilename(name) {
+  return (name.trim() || "van-ban-moi")
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .slice(0, 150);
+}
+
+function downloadBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+function makeExport() {
+  const text = content.value;
+  const base = safeFilename(filename.value);
+  let blob;
+  let ext = format.value;
+
+  switch (ext) {
+    case "txt":
+    case "md":
+      blob = new Blob(["\uFEFF", text], {
+        type: "text/plain;charset=utf-8"
+      });
+      break;
+
+    case "html":
+      const html = `<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>${escapeHtml(base)}</title>
+</head>
+<body><pre style="white-space:pre-wrap;font-family:Arial,sans-serif">${escapeHtml(text)}</pre></body>
+</html>`;
+      blob = new Blob([html], {
+        type: "text/html;charset=utf-8"
+      });
+      break;
+
+    case "csv":
+      // Xuất một cột "Nội dung"; mỗi dòng văn bản là một dòng CSV.
+      const rows = ["Nội dung", ...text.split(/\r\n|\r|\n/)];
+      const csv = rows.map(value =>
+        '"' + value.replace(/"/g, '""') + '"'
+      ).join("\r\n");
+      blob = new Blob(["\uFEFF", csv], {
+        type: "text/csv;charset=utf-8"
+      });
+      break;
+
+    case "json":
+      blob = new Blob([
+        JSON.stringify({
+          filename: base,
+          content: text
+        }, null, 2)
+      ], { type: "application/json;charset=utf-8" });
+      break;
+
+    case "doc":
+      const docHtml = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body><pre style="white-space:pre-wrap;font-family:Arial">${escapeHtml(text)}</pre></body></html>`;
+      blob = new Blob(["\uFEFF", docHtml], {
+        type: "application/msword"
+      });
+      break;
+
+    case "pdf":
+      exportPDF(base);
+      return;
+
+    default:
+      status("Định dạng chưa được hỗ trợ.", true);
+      return;
+  }
+
+  downloadBlob(blob, base + "." + ext);
+  status("Đã tạo file " + base + "." + ext);
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+async function exportPDF(base) {
+  if (typeof html2pdf === "undefined") {
+    status("Không tải được thư viện PDF. Hãy kiểm tra Internet.", true);
+    return;
+  }
+
+  const node = document.createElement("div");
+  node.style.cssText =
+    "font-family:Arial,sans-serif;font-size:12pt;line-height:1.6;" +
+    "color:#111;background:white;white-space:pre-wrap;" +
+    "overflow-wrap:anywhere;word-break:break-word;padding:10px;";
+  node.textContent = content.value;
+  document.body.appendChild(node);
+
+  try {
+    status("Đang tạo PDF...");
+    await html2pdf().set({
+      margin: 12,
+      filename: base + ".pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["css", "legacy"] }
+    }).from(node).save();
+    status("Đã xuất PDF.");
+  } catch (error) {
+    status("Tạo PDF thất bại. Hãy thử lại hoặc dùng chức năng In.", true);
+  } finally {
+    node.remove();
+  }
+}
+
+document.getElementById("exportBtn").addEventListener("click", makeExport);
+
+document.getElementById("copyBtn").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(content.value);
+    status("Đã sao chép văn bản.");
+  } catch (error) {
+    content.focus();
+    content.select();
+    status("Đã chọn văn bản. Hãy nhấn Sao chép trên thiết bị.");
+  }
+});
+
+document.getElementById("openBtn").addEventListener("click", () => {
+  fileInput.click();
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  if (!content.value || confirm("Bạn có chắc muốn xóa toàn bộ văn bản?")) {
+    content.value = "";
+    updateStats();
+    status("Đã xóa nội dung.");
+  }
+});
+
+format.addEventListener("change", () => {
+  if (format.value === "pdf") {
+    status("PDF sẽ được tạo từ nội dung văn bản hiện tại.");
+  } else {
+    status("Định dạng: " + format.options[format.selectedIndex].text);
+  }
+});
+
+updateStats();
+</script>
+</body>
+</html>
